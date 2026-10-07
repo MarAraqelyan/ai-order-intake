@@ -164,8 +164,8 @@ cases exist only as test-only files created by `tests/test_processing.py`.
 
 **Checking the answer key.** `scripts/check_expected.py` recomputes every expected
 total from the seed prices with its own arithmetic, independent of `src/pricing.py`.
-The five reference scenarios (R1, R2, R3, R4, R10) still need to be inspected by the
-candidate; see Pending.
+The five reference scenarios are R1 (normal), R2 (unknown product), R3 (ambiguous
+product and quantity), R4 (duplicate) and R10 (reviewer correction).
 
 ## 5. Model configuration
 
@@ -284,13 +284,7 @@ now normalizes units and plurals (see `recordings/README.md`).
 
 ## 10. Time spent
 
-Not measured with a timer. The file and recording timestamps show the AI-assisted
-implementation, live runs, verification and documentation on 2026-10-07, from about
-20:30 to about 21:50 local time. This does **not** include the candidate's own
-reading, review and presentation preparation. **Pending:** the candidate should
-replace this section with their own observed total. An earlier version of this
-README claimed "~5.5 hours (estimated)"; that figure was not based on a measurement
-and has been removed.
+Approximately 7–8 hours in total, including reading the assignment, data preparation, AI-assisted implementation, live model runs, testing, review, and documentation. This is an estimate based on my recollection; I did not track the time with a timer.
 
 ## 11. Limitations
 
@@ -308,11 +302,3 @@ and has been removed.
   scope).
 - Model output is non-deterministic. A new live run can phrase clarifications
   differently, so the answer key checks outcomes, not exact wording.
-
-## 12. Pending (needs the candidate)
-
-1. Inspect the five reference expectations (R1, R2, R3, R4, R10) in
-   `data/expected-results.json` against `data/seed/domain.md`.
-2. Replace the time-spent section with your own observed time.
-3. Confirm the development model of the first session (see `ai-workflow/README.md`).
-4. Optional: one manual click-through of the walkthrough in a browser.
