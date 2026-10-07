@@ -40,7 +40,8 @@ def main() -> int:
     manifest = {e["request_id"]: e for e in json.loads(MANIFEST.read_text())["requests"]}
     catalog = {p["sku"]: p for p in json.loads(CATALOG.read_text())}
     problems = 0
-    files = sorted(LEGACY_DIR.glob("R*.json"), key=lambda p: int(p.name[1:].split("_")[0]))
+    # "R[0-9]*" so run-metadata.json is not matched (Windows globbing ignores case).
+    files = sorted(LEGACY_DIR.glob("R[0-9]*.json"), key=lambda p: int(p.name[1:].split("_")[0]))
     for path in files:
         rec = json.loads(path.read_text(encoding="utf-8"))
         rid = rec["request_id"]
