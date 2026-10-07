@@ -1,0 +1,25 @@
+# Environment and secrets
+.env
+
+# Database (generated at runtime)
+*.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environment
+.venv/
+venv/
+.deps/
+env/
+
+# Streamlit cache
+.streamlit/
+
+# Editor
+.idea/
+.vscode/
+*.swp

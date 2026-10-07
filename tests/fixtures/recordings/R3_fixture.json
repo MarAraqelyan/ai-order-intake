@@ -1,0 +1,27 @@
+{
+  "recording_version": 1,
+  "request_id": "R3",
+  "recording_key": "FIXTURE_TEST_ONLY_DO_NOT_USE_AS_REAL_CALL",
+  "model": "gpt-4.1-mini",
+  "timestamp": "2026-10-07T00:00:00Z",
+  "fixture_label": "TEST-ONLY: not a real API call",
+  "messages": [
+    {"role": "system", "content": ""},
+    {"role": "user", "content": "Send two boxes of the usual cable."}
+  ],
+  "tool_calls": [
+    {
+      "call_id": "call_test_r3",
+      "tool_name": "search_catalog",
+      "arguments": {"query": "usual cable"},
+      "result": {"found": false, "query": "usual cable", "reason": "No product matched 'usual cable'."}
+    }
+  ],
+  "tool_results": [
+    {
+      "tool_call_id": "call_test_r3",
+      "content": "{\"found\": false, \"query\": \"usual cable\", \"reason\": \"No product matched 'usual cable'.\"}"
+    }
+  ],
+  "final_response": "{\"status\": \"needs-clarification\", \"lines\": [{\"sku\": null, \"quantity\": null, \"source_quote\": \"two boxes of the usual cable\", \"is_unresolved\": true, \"clarification_reason\": \"Product is ambiguous ('usual cable' does not match a specific SKU) and box quantity cannot be converted to individual item count.\"}], \"clarification_message\": \"Could you please specify which cable (CAB-1 or CAB-2) and the number of individual items you need?\"}"
+}

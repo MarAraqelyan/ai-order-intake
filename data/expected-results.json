@@ -1,0 +1,90 @@
+[
+  {
+    "id": "R1",
+    "order_ref": "O1",
+    "outcome": "draft",
+    "lines": [{"sku": "CAB-1", "quantity": 2, "subtotal_cents": 4000, "discount_cents": 0, "line_total_cents": 4000}],
+    "order_total_cents": 4000,
+    "note": "2 x 2000 = 4000; no discount (qty 2 < 10)"
+  },
+  {
+    "id": "R2",
+    "order_ref": "O2",
+    "outcome": "needs-clarification",
+    "reason": "unknown product",
+    "note": "Moon adapter not in catalog; no SKU or description match"
+  },
+  {
+    "id": "R3",
+    "order_ref": "O3",
+    "outcome": "needs-clarification",
+    "reason": "ambiguous product and box quantity",
+    "note": "usual cable ambiguous (CAB-1 or CAB-2); box size unknown per domain rule 1"
+  },
+  {
+    "id": "R4",
+    "order_ref": "O1",
+    "outcome": "duplicate",
+    "same_order_as": "O1",
+    "new_drafts": 0,
+    "note": "Identical text and same order_ref as R1; O1 already exists"
+  },
+  {
+    "id": "R5",
+    "order_ref": "O4",
+    "outcome": "draft",
+    "lines": [{"sku": "CAB-1", "quantity": 9, "subtotal_cents": 18000, "discount_cents": 0, "line_total_cents": 18000}],
+    "order_total_cents": 18000,
+    "note": "9 x 2000 = 18000; no discount (qty 9 < 10 boundary)"
+  },
+  {
+    "id": "R6",
+    "order_ref": "O5",
+    "outcome": "draft",
+    "lines": [{"sku": "CAB-1", "quantity": 10, "subtotal_cents": 20000, "discount_cents": 2000, "line_total_cents": 18000}],
+    "order_total_cents": 18000,
+    "note": "10 x 2000 = 20000; discount = (20000+5)//10 = 2000; total = 18000 (qty=10 boundary)"
+  },
+  {
+    "id": "R7",
+    "order_ref": "O6",
+    "outcome": "draft",
+    "lines": [{"sku": "CAB-2", "quantity": 10, "subtotal_cents": 30000, "discount_cents": 3000, "line_total_cents": 27000}],
+    "order_total_cents": 27000,
+    "note": "10 x 3000 = 30000; discount = (30000+5)//10 = 3000; total = 27000"
+  },
+  {
+    "id": "R8",
+    "order_ref": "O7",
+    "outcome": "draft",
+    "lines": [{"sku": "HUB-1", "quantity": 2, "subtotal_cents": 10000, "discount_cents": 0, "line_total_cents": 10000}],
+    "order_total_cents": 10000,
+    "note": "2 x 5000 = 10000; no discount"
+  },
+  {
+    "id": "R9",
+    "order_ref": "O8",
+    "outcome": "draft",
+    "lines": [{"sku": "CAB-1", "quantity": 12, "subtotal_cents": 24000, "discount_cents": 2400, "line_total_cents": 21600}],
+    "order_total_cents": 21600,
+    "note": "12 x 2000 = 24000; discount = (24000+5)//10 = 2400; total = 21600"
+  },
+  {
+    "id": "R10",
+    "order_ref": "O9",
+    "outcome": "needs-clarification",
+    "reason": "missing quantity",
+    "note": "some CAB-1 cables - quantity not a clear positive integer; reviewer corrects qty to 3 -> 3 x 2000 = 6000"
+  },
+  {
+    "id": "R11",
+    "order_ref": "O10",
+    "outcome": "draft",
+    "lines": [
+      {"sku": "CAB-1", "quantity": 1, "subtotal_cents": 2000, "discount_cents": 0, "line_total_cents": 2000},
+      {"sku": "HUB-1", "quantity": 1, "subtotal_cents": 5000, "discount_cents": 0, "line_total_cents": 5000}
+    ],
+    "order_total_cents": 7000,
+    "note": "1 x 2000 + 1 x 5000 = 7000; no discount on either line"
+  }
+]

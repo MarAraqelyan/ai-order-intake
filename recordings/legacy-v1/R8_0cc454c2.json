@@ -1,0 +1,63 @@
+{
+  "recording_version": 1,
+  "request_id": "R8",
+  "recording_key": "0cc454c22757a3be9cafe986c03b00dc631f1b68be9dd5d895da2c4b410bfac9",
+  "model": "gpt-4.1-mini",
+  "timestamp": "2026-10-07T17:43:42.636184+00:00",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an order-intake assistant for a hardware accessories distributor.\n\nYour job is to convert a customer order request into a structured list of order lines.\nYou have access to the search_catalog tool. Use it to look up every product the customer\nmentions before proposing any SKU.\n\n## Rules you must follow\n\n1. CALL search_catalog for every product or product reference in the request.\n   Never propose a SKU without calling search_catalog first.\n\n2. If search_catalog returns {\"found\": false}, mark that line as unresolved.\n   Never invent a SKU that was not returned by the tool.\n\n3. QUANTITIES must be explicit positive integers in the customer message.\n   These are invalid quantities \u2014 mark them unresolved:\n   - \"some\" \u2192 unresolved (missing quantity)\n   - \"a few\" \u2192 unresolved\n   - \"two boxes\" \u2192 unresolved (box contents are unknown; never infer item count)\n   - \"the usual\" \u2192 unresolved (ambiguous)\n   Only accept a number that the customer stated explicitly as a count of\n   individual items.\n\n4. SOURCE QUOTES: For each line, copy the exact substring from the customer\n   message that supports the SKU and quantity. The quote must appear verbatim\n   in the original text.\n\n5. PRICING: Do not compute prices. The application handles all pricing.\n\n6. OUTPUT FORMAT: Respond with a single JSON object \u2014 no markdown fences, no\n   extra text \u2014 in exactly this structure:\n\n   {\n     \"status\": \"draft\" | \"needs-clarification\",\n     \"lines\": [\n       {\n         \"sku\": \"<SKU from catalog>\" | null,\n         \"quantity\": <positive integer> | null,\n         \"source_quote\": \"<verbatim text from request>\",\n         \"is_unresolved\": false | true,\n         \"clarification_reason\": null | \"<why this line needs clarification>\"\n       }\n     ],\n     \"clarification_message\": null | \"<polite sentence asking for missing info>\"\n   }\n\n   Set status to \"needs-clarification\" if ANY line is unresolved.\n   Set status to \"draft\" only if ALL lines are fully resolved.\n   Set clarification_message to a helpful sentence, or null if not needed.\n\n7. AMBIGUOUS PRODUCTS: If the description matches multiple products without a\n   clear SKU, mark is_unresolved=true and explain in clarification_reason.\n\n8. Do not add any text outside the JSON object."
+    },
+    {
+      "role": "user",
+      "content": "Please send 2 HUB-1 units."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_XoyqZfk8edeAvFM9TShbJFyr",
+          "type": "function",
+          "function": {
+            "name": "search_catalog",
+            "arguments": "{\"query\":\"HUB-1\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_XoyqZfk8edeAvFM9TShbJFyr",
+      "content": "{\"found\": true, \"sku\": \"HUB-1\", \"description\": \"USB hub\", \"unit_cents\": 5000, \"match_type\": \"sku\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "{\n  \"status\": \"draft\",\n  \"lines\": [\n    {\n      \"sku\": \"HUB-1\",\n      \"quantity\": 2,\n      \"source_quote\": \"2 HUB-1 units\",\n      \"is_unresolved\": false,\n      \"clarification_reason\": null\n    }\n  ],\n  \"clarification_message\": null\n}"
+    }
+  ],
+  "tool_calls": [
+    {
+      "call_id": "call_XoyqZfk8edeAvFM9TShbJFyr",
+      "tool_name": "search_catalog",
+      "arguments": {
+        "query": "HUB-1"
+      },
+      "result": {
+        "found": true,
+        "sku": "HUB-1",
+        "description": "USB hub",
+        "unit_cents": 5000,
+        "match_type": "sku"
+      }
+    }
+  ],
+  "tool_results": [
+    {
+      "tool_call_id": "call_XoyqZfk8edeAvFM9TShbJFyr",
+      "content": "{\"found\": true, \"sku\": \"HUB-1\", \"description\": \"USB hub\", \"unit_cents\": 5000, \"match_type\": \"sku\"}"
+    }
+  ],
+  "final_response": "{\n  \"status\": \"draft\",\n  \"lines\": [\n    {\n      \"sku\": \"HUB-1\",\n      \"quantity\": 2,\n      \"source_quote\": \"2 HUB-1 units\",\n      \"is_unresolved\": false,\n      \"clarification_reason\": null\n    }\n  ],\n  \"clarification_message\": null\n}"
+}

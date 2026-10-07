@@ -1,0 +1,63 @@
+{
+  "recording_version": 1,
+  "request_id": "R7",
+  "recording_key": "b92af16385a4ecff2f00176683b86f1f14504cc2b3e162ce2b467f7db413b09a",
+  "model": "gpt-4.1-mini",
+  "timestamp": "2026-10-07T17:43:40.132964+00:00",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an order-intake assistant for a hardware accessories distributor.\n\nYour job is to convert a customer order request into a structured list of order lines.\nYou have access to the search_catalog tool. Use it to look up every product the customer\nmentions before proposing any SKU.\n\n## Rules you must follow\n\n1. CALL search_catalog for every product or product reference in the request.\n   Never propose a SKU without calling search_catalog first.\n\n2. If search_catalog returns {\"found\": false}, mark that line as unresolved.\n   Never invent a SKU that was not returned by the tool.\n\n3. QUANTITIES must be explicit positive integers in the customer message.\n   These are invalid quantities \u2014 mark them unresolved:\n   - \"some\" \u2192 unresolved (missing quantity)\n   - \"a few\" \u2192 unresolved\n   - \"two boxes\" \u2192 unresolved (box contents are unknown; never infer item count)\n   - \"the usual\" \u2192 unresolved (ambiguous)\n   Only accept a number that the customer stated explicitly as a count of\n   individual items.\n\n4. SOURCE QUOTES: For each line, copy the exact substring from the customer\n   message that supports the SKU and quantity. The quote must appear verbatim\n   in the original text.\n\n5. PRICING: Do not compute prices. The application handles all pricing.\n\n6. OUTPUT FORMAT: Respond with a single JSON object \u2014 no markdown fences, no\n   extra text \u2014 in exactly this structure:\n\n   {\n     \"status\": \"draft\" | \"needs-clarification\",\n     \"lines\": [\n       {\n         \"sku\": \"<SKU from catalog>\" | null,\n         \"quantity\": <positive integer> | null,\n         \"source_quote\": \"<verbatim text from request>\",\n         \"is_unresolved\": false | true,\n         \"clarification_reason\": null | \"<why this line needs clarification>\"\n       }\n     ],\n     \"clarification_message\": null | \"<polite sentence asking for missing info>\"\n   }\n\n   Set status to \"needs-clarification\" if ANY line is unresolved.\n   Set status to \"draft\" only if ALL lines are fully resolved.\n   Set clarification_message to a helpful sentence, or null if not needed.\n\n7. AMBIGUOUS PRODUCTS: If the description matches multiple products without a\n   clear SKU, mark is_unresolved=true and explain in clarification_reason.\n\n8. Do not add any text outside the JSON object."
+    },
+    {
+      "role": "user",
+      "content": "We need 10 USB-C 2-meter cables."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_3OjOzcda0excvJRZ89M345ue",
+          "type": "function",
+          "function": {
+            "name": "search_catalog",
+            "arguments": "{\"query\":\"USB-C cable 2 m\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_3OjOzcda0excvJRZ89M345ue",
+      "content": "{\"found\": true, \"sku\": \"CAB-2\", \"description\": \"USB-C cable 2 m\", \"unit_cents\": 3000, \"match_type\": \"description\"}"
+    },
+    {
+      "role": "assistant",
+      "content": "{\n  \"status\": \"draft\",\n  \"lines\": [\n    {\n      \"sku\": \"CAB-2\",\n      \"quantity\": 10,\n      \"source_quote\": \"10 USB-C 2-meter cables\",\n      \"is_unresolved\": false,\n      \"clarification_reason\": null\n    }\n  ],\n  \"clarification_message\": null\n}"
+    }
+  ],
+  "tool_calls": [
+    {
+      "call_id": "call_3OjOzcda0excvJRZ89M345ue",
+      "tool_name": "search_catalog",
+      "arguments": {
+        "query": "USB-C cable 2 m"
+      },
+      "result": {
+        "found": true,
+        "sku": "CAB-2",
+        "description": "USB-C cable 2 m",
+        "unit_cents": 3000,
+        "match_type": "description"
+      }
+    }
+  ],
+  "tool_results": [
+    {
+      "tool_call_id": "call_3OjOzcda0excvJRZ89M345ue",
+      "content": "{\"found\": true, \"sku\": \"CAB-2\", \"description\": \"USB-C cable 2 m\", \"unit_cents\": 3000, \"match_type\": \"description\"}"
+    }
+  ],
+  "final_response": "{\n  \"status\": \"draft\",\n  \"lines\": [\n    {\n      \"sku\": \"CAB-2\",\n      \"quantity\": 10,\n      \"source_quote\": \"10 USB-C 2-meter cables\",\n      \"is_unresolved\": false,\n      \"clarification_reason\": null\n    }\n  ],\n  \"clarification_message\": null\n}"
+}

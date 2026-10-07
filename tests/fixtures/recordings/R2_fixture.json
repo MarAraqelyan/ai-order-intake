@@ -1,0 +1,27 @@
+{
+  "recording_version": 1,
+  "request_id": "R2",
+  "recording_key": "FIXTURE_TEST_ONLY_DO_NOT_USE_AS_REAL_CALL",
+  "model": "gpt-4.1-mini",
+  "timestamp": "2026-10-07T00:00:00Z",
+  "fixture_label": "TEST-ONLY: not a real API call",
+  "messages": [
+    {"role": "system", "content": ""},
+    {"role": "user", "content": "Please send one Moon adapter."}
+  ],
+  "tool_calls": [
+    {
+      "call_id": "call_test_r2",
+      "tool_name": "search_catalog",
+      "arguments": {"query": "Moon adapter"},
+      "result": {"found": false, "query": "Moon adapter", "reason": "No product matched 'Moon adapter'."}
+    }
+  ],
+  "tool_results": [
+    {
+      "tool_call_id": "call_test_r2",
+      "content": "{\"found\": false, \"query\": \"Moon adapter\", \"reason\": \"No product matched 'Moon adapter'.\"}"
+    }
+  ],
+  "final_response": "{\"status\": \"needs-clarification\", \"lines\": [{\"sku\": null, \"quantity\": 1, \"source_quote\": \"one Moon adapter\", \"is_unresolved\": true, \"clarification_reason\": \"Product 'Moon adapter' was not found in the catalog.\"}], \"clarification_message\": \"Could you please clarify which product you need? 'Moon adapter' does not match any item in our catalog.\"}"
+}

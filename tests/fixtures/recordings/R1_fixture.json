@@ -1,0 +1,27 @@
+{
+  "recording_version": 1,
+  "request_id": "R1",
+  "recording_key": "FIXTURE_TEST_ONLY_DO_NOT_USE_AS_REAL_CALL",
+  "model": "gpt-4.1-mini",
+  "timestamp": "2026-10-07T00:00:00Z",
+  "fixture_label": "TEST-ONLY: not a real API call",
+  "messages": [
+    {"role": "system", "content": ""},
+    {"role": "user", "content": "Please send 2 individual CAB-1 cables."}
+  ],
+  "tool_calls": [
+    {
+      "call_id": "call_test_r1",
+      "tool_name": "search_catalog",
+      "arguments": {"query": "CAB-1"},
+      "result": {"found": true, "sku": "CAB-1", "description": "USB-C cable 1 m", "unit_cents": 2000, "match_type": "sku"}
+    }
+  ],
+  "tool_results": [
+    {
+      "tool_call_id": "call_test_r1",
+      "content": "{\"found\": true, \"sku\": \"CAB-1\", \"description\": \"USB-C cable 1 m\", \"unit_cents\": 2000, \"match_type\": \"sku\"}"
+    }
+  ],
+  "final_response": "{\"status\": \"draft\", \"lines\": [{\"sku\": \"CAB-1\", \"quantity\": 2, \"source_quote\": \"2 individual CAB-1 cables\", \"is_unresolved\": false, \"clarification_reason\": null}], \"clarification_message\": null}"
+}

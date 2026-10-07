@@ -1,0 +1,114 @@
+# AI workflow used during this exercise
+
+Status words follow the template: `used`, `default`, `not-used`, `redacted`,
+`not-exportable`. Anything that could not be checked from inside the project or the
+current session is marked as such rather than guessed.
+
+## Tools and models
+
+### Development-time (coding assistant), not part of the application
+
+| Item | Value | Status / evidence |
+|---|---|---|
+| Tool | Claude Code, VS Code extension (Anthropic) on Windows 11 | used |
+| Extension version | Installed: `anthropic.claude-code-2.1.183`, `-2.1.289`, `-2.1.292` (folder names under `%USERPROFILE%\.vscode\extensions`). Which one was running was not recorded. | not-exportable |
+| Model, session 2 (this documentation, the live runs, hardening, verification) | Claude Opus 5.5, model id `claude-opus-5-5` (from the session's own system information) | used |
+| Model, session 1 (first version of the code, files dated 2026-10-07 20:32–20:50 local) | That session's notes recorded `claude-sonnet-4-6`. It cannot be checked from session 2. | not-exportable (needs candidate confirmation) |
+| Settings changed | None in project or user configuration. Session 2 ran in Claude Code's "auto" permission mode. Effort and other settings were not recorded. | default / not-exportable |
+| Subagents | Session 2: none. Session 1 notes mention plan mode and Explore/Plan subagents; cannot be checked. | not-used (session 2) / not-exportable (session 1) |
+
+### Application model (runtime)
+
+| Parameter | Value | Status |
+|---|---|---|
+| Provider / API | OpenAI Chat Completions, Python SDK `openai==3.26.0` | used |
+| Model | `gpt-4.1-mini` requested (`OPENAI_MODEL`, default). API reported `gpt-4.1-mini-2025-04-14` in every recorded response. | used |
+| temperature, top_p, max output tokens | Not set (API defaults) | default |
+| tool_choice / parallel_tool_calls | `auto` / `false` | used |
+| response_format | strict JSON schema `order_draft` (`src/schemas.py`) | used |
+| Tool | `search_catalog`, strict function schema | used |
+| Loop limits | max 5 model turns, timeout 60 s, SDK `max_retries=2` | used |
+
+## Configuration files
+
+| What | Path | Notes |
+|---|---|---|
+| Development brief (verbatim) | `ai-workflow/dev-prompt.md` | Available in session 2. Wrapper text noted at the top. |
+| Later development instructions | `ai-workflow/session-instructions.md` | Session 2 follow-ups, verbatim |
+| Session 1 prompts | (none) | not-exportable: not available in session 2 |
+| Application system prompt (current) | `src/llm.py` `SYSTEM_PROMPT`; copy in `ai-workflow/prompt-snapshots/system-prompt-v2.txt` | used |
+| Application system prompt (first live run) | `ai-workflow/prompt-snapshots/system-prompt-v1.txt` | Copied from the format-1 recordings. All 10 recording keys reproduce with it (`scripts/verify_legacy_recordings.py`). |
+| Tool definition, output schema | `src/llm.py` `TOOL_DEFINITION`; `src/schemas.py` | used |
+| Exercise rules | `data/seed/domain.md` (unchanged starter copy) | used |
+| Data-generation skill | Starter `skills/generate-assignment-data/SKILL.md` (not copied into the repo; not installed as a skill) | Session 1 notes say it was followed; cannot be checked. Session 2 only read it. |
+| Environment variable names | `.env.example` | `OPENAI_API_KEY`, `OPENAI_MODEL`, `DB_PATH` |
+| Claude Code project config (`.claude/`, `CLAUDE.md`) | none exist | not-used |
+| User-level Claude Code / VS Code config | not copied | Not changed for this exercise and not needed to reproduce the project |
+| Hooks, MCP servers, custom agents, custom skills | none created | not-used. A claude.ai documents connector was available in session 2 and was not used. |
+
+**Redactions:** the value of `OPENAI_API_KEY` (kept only in the git-ignored `.env`).
+Nothing else was redacted.
+
+**Earlier versions:** Git history starts with the submission commit. Earlier
+application configurations are preserved as named snapshots:
+`prompt-snapshots/system-prompt-v1.txt`, `recordings/legacy-v1/` and
+`recordings/superseded-search-v1/` (each recording embeds its prompt, and format-2
+recordings embed the full fingerprint components).
+
+## One workflow example
+
+**Instruction (session 2, verbatim excerpt):**
+> For R3, search the catalog for the ambiguous cable description and preserve the
+> ambiguity between cable products and the unknown individual-item quantity. If
+> another real call is needed, make a bounded call and save it accurately. Do not
+> invent tool calls in existing recordings.
+
+**Configuration it changed.**
+- The application prompt (`system-prompt-v1.txt` → `system-prompt-v2.txt`) gained
+  this rule:
+  > For a vague reference such as "the usual cable", search for the product word the
+  > customer used (for example "cable"). Only propose a SKU that search_catalog
+  > returned with found=true.
+- `search_catalog` now returns at most 5 *candidates* that share a word with the
+  query, without resolving one.
+- The recording fingerprint gained the prompt, catalog, schema and search code.
+
+**How the output was checked.**
+1. Before the change, `scripts/verify_legacy_recordings.py` confirmed from the
+   unmodified format-1 file that R3 made **no** tool call.
+2. After the change, real calls were made. `recordings/R3_41a106639114.json` shows
+   `search_catalog("cable")` → not found, candidates CAB-1 and CAB-2, and a final
+   line with `sku=null, quantity=null`.
+3. `scripts/check_expected.py` compared all 11 requests with the independent answer
+   key.
+
+**Correction it led to.** The same live run that fixed R3 broke R7: the model now
+searched "USB-C 2 meter cable", which the phrase-only search could not match, so R7
+became needs-clarification while the answer key expects CAB-2 × 10. The assistant did
+not change the expectation. It changed the search to match when all words of one
+description appear in the query (units and plurals normalized). It added the search
+code to the fingerprint, kept the 10 now-stale recordings in
+`recordings/superseded-search-v1/`, recorded all requests again, and got 11/11 OK
+live and in replay.
+
+## Reproduce or replay
+
+- Requirements: Python 3.12, `pip install -r requirements.txt` (versions pinned).
+- Configuration: `.env` in the project root (copy `.env.example`). Only live mode
+  needs `OPENAI_API_KEY`.
+- Replay without credentials (PowerShell):
+  `$env:OPENAI_API_KEY = ""; python -m src.cli --mode replay --db replay-check.db; python scripts/check_expected.py replay-check.db`
+  or in the app: `python -m streamlit run app.py`, mode **replay**, **Process All**.
+- No hooks exist, so there is nothing to enable.
+
+## Decisions and limitations
+
+- The default Claude Code setup was enough. No skills, agents, hooks or MCP servers
+  were created for this exercise.
+- The existing Chat Completions loop was hardened rather than migrated to the
+  Responses API, as instructed: strict tool, strict `response_format`, Pydantic,
+  failure categories.
+- Session 1 details (model, prompts, subagents, skill use) rest on that session's own
+  notes and are marked not-exportable. The candidate should confirm the model.
+- With hindsight, starting Git at the first file and saving each session's prompts as
+  they were given would have made this record complete.

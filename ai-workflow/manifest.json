@@ -1,0 +1,183 @@
+{
+  "template": false,
+  "instructions": "Exercise-specific records for the orders assignment (Alternative A). Statuses: used, default, not-used, redacted, not-exportable. No credentials.",
+  "categories": {
+    "development_tools_and_models": {
+      "status": "used",
+      "files": ["ai-workflow/README.md"],
+      "notes": "Claude Code VS Code extension (installed versions 2.1.183 / 2.1.289 / 2.1.292; running version not recorded). Session 2 model: claude-opus-5-5. Session 1 model recorded by that session as claude-sonnet-4-6, not verifiable (not-exportable)."
+    },
+    "plugins_and_extensions": {
+      "status": "used",
+      "files": [],
+      "notes": "Only the Claude Code VS Code extension. A claude.ai documents connector was available in session 2 and not used."
+    },
+    "application_models_and_parameters": {
+      "status": "used",
+      "files": ["src/llm.py", "src/schemas.py", ".env.example"],
+      "notes": "OpenAI Chat Completions via openai==3.26.0. Requested gpt-4.1-mini (OPENAI_MODEL); API reported gpt-4.1-mini-2025-04-14. temperature/top_p/max tokens: API defaults. tool_choice=auto, parallel_tool_calls=false, strict response_format order_draft, strict search_catalog tool, max 5 model turns, timeout 60 s, max_retries 2."
+    },
+    "skills": {
+      "status": "not-exportable",
+      "files": [],
+      "notes": "Starter skill generate-assignment-data was not installed. Session 1 notes say its SKILL.md instructions were followed for fixtures R5-R11; this cannot be verified. Session 2 only read it. No custom skills created."
+    },
+    "agent_instructions_and_subagents": {
+      "status": "not-used",
+      "files": [],
+      "notes": "No CLAUDE.md, no .claude/ directory, no custom agents. Session 2 used no subagents. Session 1 notes mention plan mode and Explore/Plan subagents (not verifiable)."
+    },
+    "hooks_and_scripts": {
+      "status": "not-used",
+      "files": [],
+      "notes": "No hooks. scripts/ contains ordinary verification scripts, not AI hooks."
+    },
+    "prompts_and_rules": {
+      "status": "used",
+      "files": [
+        "ai-workflow/dev-prompt.md",
+        "ai-workflow/session-instructions.md",
+        "ai-workflow/prompt-snapshots/system-prompt-v1.txt",
+        "ai-workflow/prompt-snapshots/system-prompt-v2.txt",
+        "src/llm.py",
+        "data/seed/domain.md"
+      ],
+      "notes": "Development brief saved verbatim from session 2; session 1 prompts not available (not-exportable). Application prompt v2 is current; v1 was used for the first live run."
+    },
+    "tool_and_mcp_settings": {
+      "status": "used",
+      "files": ["src/llm.py", "src/catalog.py"],
+      "notes": "Application tool: search_catalog (strict function schema, Pydantic-validated arguments, max 5 candidates). No MCP servers configured for the project."
+    },
+    "permissions_and_environment_names": {
+      "status": "redacted",
+      "files": [".env.example", ".gitignore"],
+      "notes": "OPENAI_API_KEY value redacted (only in git-ignored .env). OPENAI_MODEL and DB_PATH optional. Claude Code ran in its auto permission mode in session 2; no permission settings files were created or changed."
+    }
+  },
+  "configuration_records": [
+    {
+      "name": "Claude Code (VS Code extension)",
+      "category": "development_tools_and_models",
+      "purpose": "Coding assistant for implementation, live runs, verification and documentation",
+      "original_path_or_scope": "%USERPROFILE%\\.vscode\\extensions\\anthropic.claude-code-*",
+      "saved_path": "not-applicable",
+      "version_or_commit": "installed 2.1.183, 2.1.289, 2.1.292; running version not recorded",
+      "used_during": "sessions 1 and 2 on 2026-10-07",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "claude-opus-5-5",
+      "category": "development_tools_and_models",
+      "purpose": "Assistant model in session 2",
+      "original_path_or_scope": "Claude Code session",
+      "saved_path": "not-applicable",
+      "version_or_commit": "claude-opus-5-5",
+      "used_during": "session 2: duplicate/changed-request fixes, live runs, hardening, recordings, docs, Git",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "claude-sonnet-4-6 (as recorded by session 1)",
+      "category": "development_tools_and_models",
+      "purpose": "Assistant model in session 1 (first version of the code)",
+      "original_path_or_scope": "Claude Code session",
+      "saved_path": "not-applicable",
+      "version_or_commit": "not verifiable",
+      "used_during": "session 1 (files dated 2026-10-07 20:32-20:50 local)",
+      "status": "not-exportable",
+      "redactions": []
+    },
+    {
+      "name": "Development brief",
+      "category": "prompts_and_rules",
+      "purpose": "Assignment instructions given to the coding assistant",
+      "original_path_or_scope": "Claude Code session 2 chat",
+      "saved_path": "ai-workflow/dev-prompt.md",
+      "version_or_commit": "verbatim",
+      "used_during": "session 2",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "Session 2 follow-up instructions",
+      "category": "prompts_and_rules",
+      "purpose": "Later instructions (live run, bug fixes, hardening, submission)",
+      "original_path_or_scope": "Claude Code session 2 chat",
+      "saved_path": "ai-workflow/session-instructions.md",
+      "version_or_commit": "verbatim",
+      "used_during": "session 2",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "Application system prompt v2 (current)",
+      "category": "prompts_and_rules",
+      "purpose": "Instructs gpt-4.1-mini: data-not-instructions, search every product reference, keep uncertainty",
+      "original_path_or_scope": "src/llm.py SYSTEM_PROMPT",
+      "saved_path": "ai-workflow/prompt-snapshots/system-prompt-v2.txt",
+      "version_or_commit": "sha256 ac75ab43f69f830c2f2341c6d414f6169f82b0d30671e8bfc0bc693b62dfb3ec",
+      "used_during": "recordings/*.json and recordings/superseded-search-v1/",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "Application system prompt v1",
+      "category": "prompts_and_rules",
+      "purpose": "Original prompt (JSON format described in text, no schema)",
+      "original_path_or_scope": "src/llm.py build_system_prompt() before session 2 hardening",
+      "saved_path": "ai-workflow/prompt-snapshots/system-prompt-v1.txt",
+      "version_or_commit": "verified by reproducing all 10 legacy recording keys",
+      "used_during": "recordings/legacy-v1/ (first live run)",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "search_catalog tool + order_draft output schema",
+      "category": "tool_and_mcp_settings",
+      "purpose": "Catalog lookup for the model; strict structured final answer",
+      "original_path_or_scope": "src/llm.py TOOL_DEFINITION, src/catalog.py, src/schemas.py",
+      "saved_path": "src/llm.py, src/catalog.py, src/schemas.py",
+      "version_or_commit": "hashes stored in every format-2 recording (fingerprint_components)",
+      "used_during": "every live and replay run",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "OpenAI gpt-4.1-mini",
+      "category": "application_models_and_parameters",
+      "purpose": "Convert order messages into draft orders via tool calling",
+      "original_path_or_scope": "OPENAI_MODEL (default in src/llm.py)",
+      "saved_path": ".env.example",
+      "version_or_commit": "API-reported gpt-4.1-mini-2025-04-14",
+      "used_during": "live runs on 2026-10-07 (17:43, 18:21, 18:23 UTC)",
+      "status": "used",
+      "redactions": []
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "category": "permissions_and_environment_names",
+      "purpose": "Authentication for live mode",
+      "original_path_or_scope": ".env (git-ignored)",
+      "saved_path": ".env.example (name only)",
+      "version_or_commit": "not-applicable",
+      "used_during": "live mode only",
+      "status": "redacted",
+      "redactions": ["API key value"]
+    },
+    {
+      "name": "OPENAI_MODEL, DB_PATH",
+      "category": "permissions_and_environment_names",
+      "purpose": "Optional model override and database path",
+      "original_path_or_scope": ".env (optional)",
+      "saved_path": ".env.example",
+      "version_or_commit": "defaults: gpt-4.1-mini, orders.db",
+      "used_during": "all runs (defaults)",
+      "status": "default",
+      "redactions": []
+    }
+  ],
+  "replay_command": "$env:OPENAI_API_KEY = \"\"; python -m src.cli --mode replay --db replay-check.db; python scripts/check_expected.py replay-check.db",
+  "workflow_example_path": "ai-workflow/README.md#one-workflow-example"
+}
