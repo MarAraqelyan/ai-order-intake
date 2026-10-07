@@ -230,6 +230,15 @@ def list_conflicting_requests(order_ref: Optional[str] = None,
     return [dict(r) for r in rows]
 
 
+def count_processed_requests(db_path: str = DB_PATH) -> int:
+    """Requests with at least one processing attempt (any outcome, duplicates included)."""
+    with get_connection(db_path) as conn:
+        row = conn.execute(
+            "SELECT COUNT(DISTINCT request_id) AS cnt FROM processing_attempts"
+        ).fetchone()
+    return row["cnt"]
+
+
 def mark_request_duplicate(request_id: str, duplicate_of: str,
                            db_path: str = DB_PATH) -> None:
     """Link a repeated request to the original request. The order itself is not changed."""

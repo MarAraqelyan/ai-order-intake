@@ -63,9 +63,10 @@ def set_quantity(at, value):
 
 def test_summary_counts(replay_db):
     assert metrics(start()) == {
-        "Ready for review": "7", "Needs clarification": "3", "Processing failed": "0",
-        "Reviewed": "0", "Distinct orders": "10", "Duplicate requests": "1",
-        "Changed requests": "0",
+        "Requests processed": "11", "Duplicate requests": "1", "Changed requests": "0",
+        "Distinct orders": "10", "Orders ready for review": "7",
+        "Orders needing clarification": "3", "Orders failed processing": "0",
+        "Orders reviewed": "0",
     }
 
 
@@ -101,7 +102,7 @@ def test_r10_correction_review_and_restart(replay_db):
 
     # Restart: a new AppTest has no session state; everything comes from SQLite.
     at2 = start()
-    assert metrics(at2)["Reviewed"] == "1"
+    assert metrics(at2)["Orders reviewed"] == "1"
     click(at2, "btn_O9")
     assert "draft" in caption(at2) and "Review: reviewed" in caption(at2)
     assert order_total(at2) == ["**Order total:** $60.00"]

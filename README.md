@@ -98,7 +98,7 @@ docs/verification.md   Expected vs observed results
 2. Same order_ref **and** same text as an earlier request → mark as duplicate
    (`requests.duplicate_of`) and stop. No model call, no new order.
 3. Same order_ref, **different** text → flag as changed (`requests.conflicts_with`)
-   and stop (see Assumptions).
+   and stop (see "Rule ambiguities and implementation choices").
 4. Order already processed and not failed → skip (protects human corrections).
 5. Model call (`llm.call_llm`): up to 5 model turns, `search_catalog` tool,
    strict JSON-schema answer, 60 s timeout, 2 SDK retries.
@@ -119,15 +119,21 @@ only for a valid draft. **Save** on a line reruns pricing and checks without a m
 call. If the order was reviewed, it goes back to `pending`. Every change is stored in
 `corrections` with old value, new value, actor and timestamp.
 
-**Summary counts.** Ready for review = valid drafts not yet reviewed. Needs
-clarification / Processing failed / Reviewed / Distinct orders count **orders**
-(order_refs). Duplicate requests and Changed requests count **requests**.
+**Summary counts.** The dashboard has two labelled rows.
+- **Requests:** *Requests processed* (request files with at least one processing
+  attempt, duplicates included), *Duplicate requests* and *Changed requests*.
+- **Orders** (one per order_ref): *Distinct orders*, *Orders ready for review*
+  (valid drafts not yet reviewed), *Orders needing clarification*, *Orders failed
+  processing* and *Orders reviewed*.
+
+With the sample data that gives 11 requests, 1 duplicate and 10 orders. The queue
+lists orders.
 
 ## 4. Data and mapping
 
 | Source | Repository location |
 |---|---|
-| Starter `tasks/orders/domain.md`, `seed.json`, `expected-seed-results.json` | `data/seed/` (byte-identical copies) |
+| Starter `tasks/orders/domain.md`, `seed.json`, `expected-seed-results.json`, `request.template.json` | `data/seed/` (byte-identical copies of the files in `client-ai-starter-pack.zip`) |
 | Seed catalog (`seed.json` → `catalog`) | `data/catalog.json` (field `name` renamed `description`; a test checks it equals the seed) |
 | Seed requests R1–R4 | `data/requests/R1.txt`–`R4.txt`, text unchanged |
 | Added requests R5–R11 | `data/requests/R5.txt`–`R11.txt` |
@@ -188,10 +194,39 @@ missing file gives `[replay-missing]`. A recorded failure replays as the same
 failure. Details, formats, and the older recordings (`legacy-v1/`,
 `superseded-search-v1/`): [`recordings/README.md`](recordings/README.md).
 
-## 7. Assumptions (implementation choices)
+## 7. Rule ambiguities and implementation choices
 
-1. **Duplicates vs changed content on the same order_ref.** The supplied rules do not
-   define merging, so this is our chosen behaviour:
+The supplied rules (`data/seed/domain.md`) leave some cases open. These are the
+choices made, so a reviewer can disagree with a specific decision rather than
+discover it in the code.
+
+1. **Product matching.** The rules say "SKU or an unambiguous catalog description"
+   but do not define *unambiguous*. `search_catalog` tries these steps in order:
+   1. An exact SKU (case-insensitive).
+   2. A description that contains the query (`"USB hub"`).
+   3. All words of exactly **one** description appear in the query, after
+      normalizing plurals and units (`"USB-C 2-meter cables"` → CAB-2).
+
+   Anything matching more than one product (`"cable"`, `"USB-C cables"`) or nothing
+   (`"Moon adapter"`, `"USB-C cable 3 m"`) is **not found**. Products that share a
+   word are returned as at most 5 *candidates* for a person to choose from, and are
+   never picked automatically. The model may only propose a SKU that a lookup
+   actually returned; otherwise the line stays unresolved.
+2. **Number words.** The rules say quantities are positive whole numbers of
+   individual items, but customers write "one" or "two". The **model** converts
+   number words to integers ("one Moon adapter" → 1), and the code then only accepts
+   positive integers. Booleans, 0, negatives, decimals and numeric strings make the
+   answer invalid. The code checks that the cited quote ("one Moon adapter") appears
+   in the message. It does **not** independently re-parse the number word, so a
+   reviewer should glance at quantity and quote side by side, as the review screen
+   shows them. Vague amounts ("some", "the usual") stay null.
+3. **Boxes are never items.** The rules forbid inferring box contents, so "two
+   boxes" leaves the quantity null. As a code-level guard, a check fails if any
+   quantity is resolved for a message that mentions boxes.
+4. **Changed requests sharing an order reference.** The rules say requests with the
+   same order reference describe the same order, but not what to do when the text
+   differs. The supplied rules do not define merging, so this is our chosen
+   behaviour:
    - *Identical text* (R4 repeats R1): the request is saved and linked to the
      original (`requests.duplicate_of = R1`). There is no model call and no new
      order, and the existing order's status, lines and corrections are not touched.
@@ -199,17 +234,18 @@ failure. Details, formats, and the older recordings (`legacy-v1/`,
      (`requests.conflicts_with = <original request>`). The model is not called and
      the existing lines are **not** changed. The order goes back to review status
      `pending`, and the UI shows a warning with the new text so a person decides.
-2. **Boxes are never items.** "two boxes" leaves the quantity null. A check fails if
-   any quantity is resolved for a message that mentions boxes.
-3. **Product matching** (`search_catalog`, in order): exact SKU; a description that
-   contains the query; or all words of exactly one description appear in the query,
-   after normalizing plurals and units (`2-meter` → `2 m`). Anything else is not
-   found. Products that share a word are returned as *candidates* (at most 5) for a
-   person, and are never chosen automatically.
-4. **Failed checks** (for example a quote that is not in the text) make an order
+5. **Half-up rounding: a testing limitation.** The rule says to round the 10%
+   discount to the nearest cent, with halves rounded up. The code implements this
+   as `(subtotal + 5) // 10`. However, every supplied unit price (2000, 3000, 5000
+   cents) is a multiple of 10, so a 10% discount is always a whole number of cents.
+   The supplied catalog and fixtures therefore never exercise fractional-cent
+   rounding. The half-up and round-down branches are covered only by unit tests
+   with **test-only** unit prices (1005 and 1001 cents in `tests/test_pricing.py`),
+   which are not catalog prices and do not change the supplied catalog.
+6. **Failed checks** (for example a quote that is not in the text) make an order
    needs-clarification, not ready for review, and the failed check is shown.
-5. A reviewer-entered SKU gets its own catalog lookup as evidence (`source:
-   reviewer correction`).
+7. **Reviewer SKU corrections.** A reviewer-entered SKU gets its own catalog lookup
+   as evidence (`source: reviewer correction`).
 
 ## 8. Evidence-based intake improvement
 
@@ -228,8 +264,9 @@ now normalizes units and plurals (see `recordings/README.md`).
 ## 9. Walkthrough (presentation script, ~5 minutes)
 
 1. **Start**: `python -m streamlit run app.py`, mode **replay**, **Process All**.
-   The counts show 7 ready for review, 3 needs clarification, 0 failed, 10 distinct
-   orders, 1 duplicate request. Explain that replay uses saved real calls, not fakes.
+   The counts show 11 requests processed, 1 duplicate request, 10 distinct orders,
+   7 orders ready for review, 3 needing clarification and 0 failed. Explain that
+   replay uses saved real calls, not fakes.
 2. **Normal (O1 / R1)**: original text next to the draft. CAB-1 × 2 = **$40.00**.
    Evidence shows `search_catalog("CAB-1")` → found. All 5 checks are green.
    Python computed the price, not the model.
@@ -241,8 +278,8 @@ now normalizes units and plurals (see `recordings/README.md`).
    Still 10 orders. Click Process All again: nothing new is created.
 5. **Reviewer correction (O9 / R10)**: "some CAB-1 cables". Mark reviewed is
    disabled. Type 3 → **Save**: draft, **$60.00**, checks rerun with no model call.
-   **Mark reviewed**. Stop and restart the app: the correction, the review and the
-   revision history are still there.
+   **Mark reviewed** (Orders reviewed becomes 1). Stop and restart the app: the
+   correction, the review and the revision history are still there.
 6. **Improvement**: open *Common exception reasons* and explain section 8.
 
 ## 10. Time spent

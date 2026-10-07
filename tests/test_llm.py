@@ -145,6 +145,18 @@ class TestLiveToolLoop:
             run_live(tmp_path)
         assert list(tmp_path.glob("*.json")) == []  # nothing to record without a response
 
+    def test_model_not_found_is_a_processing_failure(self, fake_openai, tmp_path):
+        """SIMULATED 404 'model not found' (test double; not a real API response)."""
+        import httpx2  # the HTTP library this openai SDK version uses
+        request = httpx2.Request("POST", "https://api.openai.com/v1/chat/completions")
+        response = httpx2.Response(404, request=request)
+        fake_openai.script += [openai.NotFoundError(
+            "The model `gpt-does-not-exist` does not exist", response=response,
+            body={"code": "model_not_found"})]
+        with pytest.raises(LLMProcessingError, match=r"\[api-error\] NotFoundError.*does not exist"):
+            run_live(tmp_path, model="gpt-does-not-exist")
+        assert list(tmp_path.glob("*.json")) == []
+
     def test_live_without_key_fails_clearly(self, monkeypatch, tmp_path):
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         with pytest.raises(LLMProcessingError, match="OPENAI_API_KEY is not set"):

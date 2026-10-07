@@ -138,21 +138,27 @@ changed_requests = storage.list_conflicting_requests(db_path=DB_PATH)
 # Summary counts row. Order counts are per order_ref; duplicate/changed counts are per request.
 ready_for_review = sum(1 for o in all_orders
                        if o["status"] == "draft" and o["review_status"] != "reviewed")
-c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
-c1.metric("Ready for review", ready_for_review,
-          help="Orders whose draft passed all checks and has not been marked reviewed yet.")
-c2.metric("Needs clarification", counts.get("needs-clarification", 0),
-          help="Orders with an unresolved product or quantity, or a failed check.")
-c3.metric("Processing failed", counts.get("failed", 0),
-          help="Orders whose latest processing attempt failed for a technical reason (retryable).")
-c4.metric("Reviewed", counts.get("reviewed", 0),
-          help="Valid drafts a person explicitly marked reviewed.")
-c5.metric("Distinct orders", counts.get("total", 0),
-          help="Number of distinct order references (orders). Duplicate requests do not add orders.")
-c6.metric("Duplicate requests", len(duplicate_requests),
+st.caption("Requests")
+r1, r2, r3 = st.columns(3)
+r1.metric("Requests processed", storage.count_processed_requests(DB_PATH),
+          help="Request files with at least one processing attempt (any outcome, duplicates included).")
+r2.metric("Duplicate requests", len(duplicate_requests),
           help="Requests that repeat an earlier request (same order_ref and text). They link to the existing order and create no new draft.")
-c7.metric("Changed requests", len(changed_requests),
+r3.metric("Changed requests", len(changed_requests),
           help="Requests with an existing order_ref but different text. Not merged; the order is sent back for review.")
+
+st.caption("Orders (one per order reference)")
+c1, c2, c3, c4, c5 = st.columns(5)
+c1.metric("Distinct orders", counts.get("total", 0),
+          help="Number of distinct order references. Duplicate requests do not add orders.")
+c2.metric("Orders ready for review", ready_for_review,
+          help="Orders whose draft passed all checks and has not been marked reviewed yet.")
+c3.metric("Orders needing clarification", counts.get("needs-clarification", 0),
+          help="Orders with an unresolved product or quantity, or a failed check.")
+c4.metric("Orders failed processing", counts.get("failed", 0),
+          help="Orders whose latest processing attempt failed for a technical reason (retryable).")
+c5.metric("Orders reviewed", counts.get("reviewed", 0),
+          help="Valid drafts a person explicitly marked reviewed.")
 
 reasons = exception_reason_counts(DB_PATH)
 if any(reasons.values()):

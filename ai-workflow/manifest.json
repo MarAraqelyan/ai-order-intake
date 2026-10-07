@@ -5,7 +5,7 @@
     "development_tools_and_models": {
       "status": "used",
       "files": ["ai-workflow/README.md"],
-      "notes": "Claude Code VS Code extension (installed versions 2.1.183 / 2.1.289 / 2.1.292; running version not recorded). Session 2 model: claude-opus-5-5. Session 1 model recorded by that session as claude-sonnet-4-6, not verifiable (not-exportable)."
+      "notes": "Claude Code VS Code extension (installed versions 2.1.183 / 2.1.289 / 2.1.292; running version not recorded). Session 2 model: claude-opus-5-5. Session 1 model recorded by that session as claude-sonnet-4-6, not verifiable (not-exportable). Claude generated the application code, added fixtures R5-R11 and answer key, tests, scripts and documentation; see 'Generated components' in ai-workflow/README.md."
     },
     "plugins_and_extensions": {
       "status": "used",

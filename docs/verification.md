@@ -67,14 +67,14 @@ Command (PowerShell): `$env:OPENAI_API_KEY = ""; python -m src.cli --mode replay
 
 ## C. Offline tests (pytest, test doubles)
 
-`python -m pytest -q` → **164 passed** (latest run, see the end of this file).
+`python -m pytest -q` → **165 passed** (latest run, see the end of this file).
 
 | File | Tests | Covers |
 |---|---|---|
 | `tests/test_pricing.py` | 22 | 4000 / 18000 / 18000 / 27000 / 21600, discount boundary 9/10, half-up rounding (test-only unit prices), invalid quantities |
 | `tests/test_catalog.py` | 22 | SKU match, description match, R7 wording, ambiguity, candidates for "usual cable", bounded candidates, runtime catalog equals the seed catalog |
 | `tests/test_validation.py` | 27 | the five checks; evidence must match the exact SKU |
-| `tests/test_llm.py` | 25 | fake OpenAI client: refusal, content filter, truncated (`length`), empty output, malformed JSON, schema violations, 7 kinds of invalid tool arguments, unknown tool, round limit, API error, no key; recording format; replay missing / mismatch by model, prompt, catalog, text; legacy file reported |
+| `tests/test_llm.py` | 26 | fake OpenAI client: refusal, content filter, truncated (`length`), empty output, malformed JSON, schema violations, 7 kinds of invalid tool arguments, unknown tool, round limit, connection error, simulated 404 "model not found", no key; recording format; replay missing / mismatch by model, prompt, catalog, text; legacy file reported |
 | `tests/test_processing.py` | 40 | R1–R4/R6/R10 flows with test doubles, invalid model quantities (0, -1, 1.5, true, "2"), SKU without lookup not confirmed, failure isolation, malformed/missing files, duplicates, changed requests, review status |
 | `tests/test_storage.py` | 21 | SQLite CRUD and duplicate lookup |
 | `tests/test_schemas.py` | 2 | API JSON schema and Pydantic model list the same fields |
@@ -84,16 +84,18 @@ Test doubles are labelled in `tests/conftest.py` ("TEST-ONLY: not a real API cal
 and `tests/test_llm.py` (`FakeOpenAI`, model `fake-model-for-tests`). They write
 only to temporary directories.
 
-Real refusals, truncated responses, timeouts and invalid tool arguments did **not**
-occur in the live runs, so those paths are verified only with test doubles.
+Real refusals, truncated responses, timeouts, unavailable models and invalid tool
+arguments did **not** occur in the live runs, so those paths are verified only with
+test doubles.
 
 ## D. Streamlit AppTest (real `app.py`, headless)
 
 `tests/test_app_ui.py` replays the real recordings into a temporary database with
 `OPENAI_API_KEY` empty, then drives the real widgets:
 
-- Summary counts: ready for review 7, needs clarification 3, processing failed 0,
-  reviewed 0, distinct orders 10, duplicate requests 1, changed requests 0.
+- Summary counts: requests processed 11, duplicate requests 1, changed requests 0;
+  distinct orders 10, orders ready for review 7, orders needing clarification 3,
+  orders failed processing 0, orders reviewed 0.
 - O1: $40.00, caption "REPLAYED from saved real-call recording", R4 link shown.
 - O3: no price, no "confirmed match", "did not identify one product".
 - O9 (R10): correction flow and restart as in demonstration 5.
@@ -115,7 +117,7 @@ catalog. R3 in that run made no catalog call (the reason for the prompt change).
 ## Latest run log
 
 ```
-python -m pytest -q                         -> 164 passed
+python -m pytest -q                         -> 165 passed
 python scripts/check_expected.py orders.db  -> 11 OK, 0 mismatches (live database)
 replay with empty OPENAI_API_KEY + check    -> 11 OK, 0 mismatches
 python scripts/verify_legacy_recordings.py  -> 10 checked, 0 problems
